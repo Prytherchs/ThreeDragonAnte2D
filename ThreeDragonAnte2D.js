@@ -112,7 +112,7 @@ var blue7 = new Card("a Blue Dragon", 7, "images/blue7.png", "evil", function (p
 var blue9 = new Card("a Blue Dragon", 9, "images/blue9.png", "evil", function (player) {alert(player);} );
 var blue11 = new Card("a Blue Dragon", 11, "images/blue11.png", "evil", function (player) {alert(player);} );
 
-var brass1 = new Card("a Brass Dragon", 1, "images/brass1.png", "good", function (player) {alert(player);} );
+var brass1 = new Card("a Brass Dragon", 1, "images/brass1.png", "good", function (player) {alert(player);} ); //
 var brass2 = new Card("a Brass Dragon", 2, "images/brass2.png", "good", function (player) {alert(player);} );
 var brass4 = new Card("a Brass Dragon", 4, "images/brass4.png", "good", function (player) {alert(player);} );
 var brass5 = new Card("a Brass Dragon", 5, "images/brass5.png", "good", function (player) {alert(player);} );
