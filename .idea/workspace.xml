@@ -36,8 +36,8 @@
       <file leaf-file-name="ThreeDragonAnte2D.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/ThreeDragonAnte2D.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="225">
-              <caret line="15" column="50" selection-start-line="15" selection-start-column="50" selection-end-line="15" selection-end-column="50" />
+            <state relative-caret-position="165">
+              <caret line="11" column="19" selection-start-line="11" selection-start-column="19" selection-end-line="11" selection-end-column="19" />
               <folding />
             </state>
           </provider>
@@ -224,12 +224,12 @@
       <option name="presentableId" value="Default" />
       <updated>1486860778182</updated>
       <workItem from="1486860779297" duration="705000" />
-      <workItem from="1486863486998" duration="143000" />
+      <workItem from="1486863486998" duration="228000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="848000" />
+    <option name="totallyTimeSpent" value="933000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="6" y="23" width="1440" height="806" extended-state="6" />
@@ -311,8 +311,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/ThreeDragonAnte2D.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="225">
-          <caret line="15" column="50" selection-start-line="15" selection-start-column="50" selection-end-line="15" selection-end-column="50" />
+        <state relative-caret-position="165">
+          <caret line="11" column="19" selection-start-line="11" selection-start-column="19" selection-end-line="11" selection-end-column="19" />
           <folding />
         </state>
       </provider>
