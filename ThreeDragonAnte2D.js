@@ -10,6 +10,7 @@ function Card(cardName, cardStrength, cardImageSrc, cardType, method) {
 	this.y2 = null;
 	this.a1 = null;
 	this.b1 = null;
+	//why does the tabs matter?
 	this.a2 = null;
 	this.b2 = null;
 	this.action = function(player) {method(player);};
