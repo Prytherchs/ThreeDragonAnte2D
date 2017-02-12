@@ -1,2 +1,4 @@
 
 *.xml
+
+node_modules/component-inherit/.npmignore
