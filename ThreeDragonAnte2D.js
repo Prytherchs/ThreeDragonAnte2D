@@ -459,16 +459,19 @@ function Card(cardName, cardStrength, uniqueBool) {
 /**
  * Starts the game
  */
+
+
 function start() {
+/*
 	//$('textarea').hide();
 	//var canvas = $('#mainCanvas');
 
-    /*
-    resetGame();
-    shuffle(deck);
-    drawCards(1, 7);
-    drawCards(2, 7);
-    */
+
+    //resetGame();
+    //shuffle(deck);
+    //drawCards(1, 7);
+    //drawCards(2, 7);
+
 
 	var ctx = document.getElementById('mainCanvas').getContext('2d'),
 	    cardWidth = window.innerWidth * .0727,
@@ -560,7 +563,7 @@ function start() {
 			});
 		});
 	});
-
+*/
 }
 
 //happens on document resize
@@ -880,6 +883,8 @@ function enemyPickCard() {
 	return Math.floor(Math.random()*enemyHand.length);
 }
 
+var id;
+
 function printUserMessage(message, color, borderColor) {
 	var highlights = document.getElementsByClassName("highlight");
 	if (highlights.length!=0){
@@ -892,9 +897,10 @@ function printUserMessage(message, color, borderColor) {
 	var eventDiv = document.getElementById("events");
 	eventDiv.scrollTop = eventDiv.scrollHeight;
 	var pos = 0;
-	clearInterval(id);
-	var id = setInterval(frame, 25);
+    clearInterval(id);
+    id = setInterval(frame, 25);
 	var msg = document.getElementsByClassName("highlight")[0];
+
 	function frame() {
 		if (pos == 60){
 			clearInterval(id);
@@ -919,7 +925,7 @@ function printMessage(message) {
 	eventDiv.scrollTop = eventDiv.scrollHeight;
 	var pos = 0;
 	clearInterval(id);
-	var id = setInterval(frame, 25);
+	id = setInterval(frame, 25);
 	var msg = document.getElementsByClassName("highlight")[0];
 	function frame() {
 		if (pos == 60){
@@ -944,6 +950,7 @@ document.addEventListener('click', function(e) {
 
 var playerId = "";
 var enemyId = "";
+var enemyName = "";
 var nameOfPlayer = "";
 
 function moveCard(card, cardCanvas, speed, growFactor, callback) {

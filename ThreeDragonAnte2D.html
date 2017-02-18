@@ -13,11 +13,11 @@
 </head>
 
 <body onload="start();" onresize="draw();">
+    <div class = "background"></div>
 	<div class = "container" id="container">
 		<canvas id="mainCanvas"></canvas>
 		<div class="box">
-			<div class="paras" id="events">
-			</div>
+			<div class="paras zeroToOne" id="events"></div>
 			<!--
 			<form name="message" action="" id="message" class="chat">
 		        <input name="msgInput" type="text" id="msgInput" autocomplete="off" class="msgInput"/>
@@ -26,8 +26,8 @@
 		    -->
 		    <div class="chat">
 		    	<input type="text" class="chat-name" id="chat-name" placeholder="Enter your name">
-		    	<textarea placeholder="Type your message" id="textArea"></textarea>
-		    	<div class="chat-status">Status: <span>Idle</span> </div>
+		    	<textarea placeholder="Type your message" id="textArea" class="zeroToOne"></textarea>
+		    	<div class="chat-status zeroToOne">Status: <span>Idle</span> </div>
 		    </div>
 		</div>
 		<canvas id="enemyFlight0"></canvas>

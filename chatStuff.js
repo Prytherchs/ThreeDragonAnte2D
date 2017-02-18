@@ -3,10 +3,12 @@
 		return document.querySelector(s);
 	},
 
+    id,
 	//Get required nodes
 	status = getNode('.chat-status span'),
 	textarea = getNode('.chat textarea'),
 	chatName = getNode('.chat-name'),
+    body = getNode('body'),
 	statusDefault = status.textContent,
 
 	//console.log(statusDefault);
@@ -24,13 +26,37 @@
 	},
 
 	setCommand = function(s) {
-		if (s == 'welcome') {
-			printMessage("Welcome to Three Dragon Ante!");
+	    //length = 0 because otherwise, animation and message repeated
+		if (s == 'welcome' || (s=="already2" && document.getElementsByTagName("p").length == 0)) {   //user successfully logged in if they got here -some animations
+            clearInterval(id);
+            id = setInterval(frame, 40);
+            var pos = 0;
+            function frame() {
+                if (pos == 60){
+                    clearInterval(id);
+                    $('.zeroToOne').css("opacity", "1");
+                    $('.background').css("opacity", ".4");
+                    $('#mainCanvas').css("border-right", "8px");
+                }
+                else {
+                    pos++;
+                    var frac1 = Math.pow(pos/60, 1.5),
+                        frac2 = Math.pow(pos/110.5, 1.5);
+                    $('.zeroToOne').css("opacity", frac1);
+                    $('.background').css("opacity", frac2);
+                }
+            }
+            if (s == "welcome") {
+                printMessage("Welcome to Three Dragon Ante!");
+            } else {
+                printMessage("There are already two players");
+            }
 		}
 	},
 
-	setEnemyId = function(s) {
-		enemyId = s;
+	setEnemyInfo = function(id, name) {
+		enemyId = id;
+        enemyName = name;
 	};
 
 	try {
@@ -77,12 +103,14 @@
 			setCommand(s);
 		});
 
-		socket.on('enemyId', function(data) {
+		socket.on('onLogin', function(data) {   //when both players are logged in
 			if (playerId == data.player1Id) {
-				setEnemyId(data.player2Id);
+				setEnemyInfo(data.player2Id, data.player2Name);
+                printMessage(data.player2Name + " joined.");
 			}
 			else {
-				setEnemyId(data.player1Id);
+				setEnemyInfo(data.player1Id, data.player1Name);
+                printMessage(data.player1Name + " joined.");
 			}
 		});
 
@@ -105,6 +133,8 @@
 			}
 
 		});
+
+
 
 		//listen for keydown
 		textarea.addEventListener('keydown', function(event) {

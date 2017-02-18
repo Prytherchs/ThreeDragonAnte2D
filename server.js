@@ -304,6 +304,7 @@ function startGame() {
 
 
 
+
 var players = new Array(2);
 
 
@@ -334,23 +335,25 @@ mongo.connect('mongodb://127.0.0.1/chat', function(err, db){
 				whitespacePattern =  /^\s*$/;
 
 
-			if (players[0] == undefined){
+			if (players[0] == undefined){   //if someone logs in and there's no players[0], make them that
 				players[0] = new Player(name, playerId);
 				sendToSocket('command', 'welcome');
 				sendToSocket('status', {
 					message: "Name created",
 					clear: true
 				});
-			} else if (players[1] == undefined && players[0].id != playerId) {
+			} else if (players[1] == undefined && players[0].id != playerId) {  //otherwise, there already is a players[0], so make players[1]
 				players[1] = new Player(name, playerId);
 				sendToSocket('command', 'welcome');
 				sendToSocket('status', {
 					message: "Name created",
 					clear: true
 				});
-				sendToClient('enemyId', {
+				sendToClient('onLogin', {   //when player 2 is created, send player IDs to both players/clients
 					player1Id: players[0].id,
-					player2Id: players[1].id
+					player2Id: players[1].id,
+                    player1Name: players[0].name,
+                    player2Name: players[1].name
 				});
 				//Emit all messages
 				if (players[0] != undefined){
@@ -361,8 +364,9 @@ mongo.connect('mongodb://127.0.0.1/chat', function(err, db){
 					});
 				}
 			} else if (players[0].id != playerId && players[1].id != playerId) {
+                sendToSocket('command', 'already2');
 				sendToSocket('status', {
-					message: 'There are already two players',
+					message: 'Not connected',
 					clear: true
 				});
 			} else if (whitespacePattern.test(name) || whitespacePattern.test(message)) {
