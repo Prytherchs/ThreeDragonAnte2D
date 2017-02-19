@@ -29,7 +29,7 @@
 	    //length = 0 because otherwise, animation and message repeated
 		if (s == 'welcome' || (s=="already2" && document.getElementsByTagName("p").length == 0)) {   //user successfully logged in if they got here -some animations
             clearInterval(id);
-            id = setInterval(frame, 40);
+            id = setInterval(frame, 25);
             var pos = 0;
             function frame() {
                 if (pos == 60){
@@ -116,7 +116,7 @@
 
 
 		chatName.addEventListener('keydown', function(event) {
-			if (event.which === 13) {
+			if (event.which === 13 && chatName.value != "") {
 				$('input').hide();
 				$('textarea').height(46);
 				$('textarea').css('visibility', 'visible');

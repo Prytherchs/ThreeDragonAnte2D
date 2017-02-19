@@ -1,3 +1,18 @@
+//shift removes from front, unshift adds to front. pop removes from back, push adds to back
+
+var locoEnum = {
+    "HAND" : 0,
+    "FLIGHT" : 1,
+    "ANTE" : 2,
+    "DISCARD" : 3,
+    "DECK" : 4
+};
+var cardTypeEnum = {
+    "EVIL" : 0,
+    "GOOD" : 1,
+    "MORTAL": 2
+};
+
 /**
  * Two players per game. This is the class for the player:
  * @param playerName
@@ -7,9 +22,9 @@
 function Player(playerName, playerId) {
 	this.name = playerName;
 	this.id = playerId;
-	this.hand = [];
+	this.hand = cardGroupHashTable(false);
 	//this.handSize = 0;
-    this.flight = [];
+    this.flight = cardGroupHashTable(false);
     //this.flightSize = 0;
 	this.setName = function(name) {
 		this.name = name;
@@ -66,6 +81,9 @@ function Card(cardName, cardStrength, cardType, method) {
 	this.name = cardName;
 	this.strength = cardStrength;
 	this.type = cardType;
+    this.index = -1;
+    this.location = locoEnum.DECK;  //which array card is in
+
 	/*
 	 (x1, y1) is upper right coordinate of card location (in pixels)
 	 (x2, y2) is lower left coordinate of card location
@@ -83,24 +101,7 @@ function Card(cardName, cardStrength, cardType, method) {
 	*/
 	//all card types have unique ability:
 	this.action = function(player) {method(player);};
-	//getters and setters:
-	this.getName = function getName() {return this.name;};
-	this.getStrength = function() {return this.strength;};
-	this.getImage = function() {return this.img;};
-	this.getType = function() {return this.type;};
-	/*
-	this.setCoord = function(x1, y1, x2, y2) {
-		this.x1 = x1;
-		this.y1 = y1;
-		this.x2 = x2;
-		this.y2 = y2;
-	};
-	this.saveCoord = function() {
-		this.a1 = this.x1;
-		this.b1 = this.y1;
-		this.a2 = this.x2;
-		this.b2 = this.y2;
-	};
+
 
 	//this.otherFunction = function(stuff) {printMessage(stuff)}; //shouldn't be necessary anymore
 	this.toString = function() {
@@ -110,33 +111,10 @@ function Card(cardName, cardStrength, cardType, method) {
             return "a " + this.name + "Dragon with strength " + this.strength;
         }
 	};
-	*/
-}
 
-/**
- * Randomizes passed in array of cards
- * @param cards
- */
-function shuffle(cards) {
-    /*
-     for each card in array:
-     swap card with random card in array
-     */
-    for (var i = 0; i < cards.length; i++) {
-        var randomIndex = Math.floor(Math.random()*cards.length),
-            tempCard = cards[i];
-        cards[i] = cards[randomIndex];
-        cards[randomIndex] = tempCard;
-    }
-}
-
-/**
- * Shuffles the discard pile and copies it into the deck array
- * Used when deck is empty
- */
-function discardToDeck() {
-    shuffle(discardPile);
-    deck.push.apply(deck, discardPile);
+	this.getId = function() {
+	    return this.name+this.strength;
+    };
 }
 
 var black = function(player) {
@@ -170,111 +148,105 @@ var black = function(player) {
         alert(player);
     };
 
-var deck = [],
-    ante = [],
-    discardPile = [];
+var deck, ante, discardPile;
 
-
+var cards = [
+    new Card("Archmage", 9, cardTypeEnum.MORTAL, function(player) {
+        alert(player);
+    }),
+    new Card("Bahamut", 13, cardTypeEnum.GOOD, function(player) {
+        alert(player);
+    }),
+    new Card("Dracolich", 10, cardTypeEnum.EVIL, function(player) {
+        alert(player);
+    }),
+    new Card("Dragonslayer", 8, cardTypeEnum.MORTAL, function(player) {
+        alert(player);
+    }),
+    new Card("Druid", 6, cardTypeEnum.MORTAL, function(player) {
+        alert(player);
+    }),
+    new Card("Fool", 3, cardTypeEnum.MORTAL, function(player) {
+        alert(player);
+    }),
+    new Card("Priest", 5, cardTypeEnum.MORTAL, function(player) {
+        alert(player);
+    }),
+    new Card("Princess", 4, cardTypeEnum.MORTAL, function(player) {
+        alert(player);
+    }),
+    new Card("Thief", 7, cardTypeEnum.MORTAL, function(player) {
+        alert(player);
+    }),
+    new Card("Tiamat", 13, cardTypeEnum.EVIL, function(player) {
+        alert(player);
+    }),
+    new Card("Black", 1, cardTypeEnum.EVIL, black),
+    new Card("Black", 2, cardTypeEnum.EVIL, black),
+    new Card("Black", 3, cardTypeEnum.EVIL, black),
+    new Card("Black", 5, cardTypeEnum.EVIL, black),
+    new Card("Black", 7, cardTypeEnum.EVIL, black),
+    new Card("Black", 9, cardTypeEnum.EVIL, black),
+    new Card("Blue", 1, cardTypeEnum.EVIL, blue),
+    new Card("Blue", 2, cardTypeEnum.EVIL, blue),
+    new Card("Blue", 4, cardTypeEnum.EVIL, blue),
+    new Card("Blue", 7, cardTypeEnum.EVIL, blue),
+    new Card("Blue", 9, cardTypeEnum.EVIL, blue),
+    new Card("Blue", 11, cardTypeEnum.EVIL, blue),
+    new Card("Brass", 1, cardTypeEnum.GOOD, brass),
+    new Card("Brass", 2, cardTypeEnum.GOOD, brass),
+    new Card("Brass", 4, cardTypeEnum.GOOD, brass),
+    new Card("Brass", 5, cardTypeEnum.GOOD, brass),
+    new Card("Brass", 7, cardTypeEnum.GOOD, brass),
+    new Card("Brass", 9, cardTypeEnum.GOOD, brass),
+    new Card("Bronze", 1, cardTypeEnum.GOOD, bronze),
+    new Card("Bronze", 3, cardTypeEnum.GOOD, bronze),
+    new Card("Bronze", 6, cardTypeEnum.GOOD, bronze),
+    new Card("Bronze", 7, cardTypeEnum.GOOD, bronze),
+    new Card("Bronze", 9, cardTypeEnum.GOOD, bronze),
+    new Card("Bronze", 11, cardTypeEnum.GOOD, bronze),
+    new Card("Copper", 1, cardTypeEnum.GOOD, copper),
+    new Card("Copper", 3, cardTypeEnum.GOOD, copper),
+    new Card("Copper", 5, cardTypeEnum.GOOD, copper),
+    new Card("Copper", 7, cardTypeEnum.GOOD, copper),
+    new Card("Copper", 8, cardTypeEnum.GOOD, copper),
+    new Card("Copper", 10, cardTypeEnum.GOOD, copper),
+    new Card("Gold", 2, cardTypeEnum.GOOD, gold),
+    new Card("Gold", 4, cardTypeEnum.GOOD, gold),
+    new Card("Gold", 6, cardTypeEnum.GOOD, gold),
+    new Card("Gold", 9, cardTypeEnum.GOOD, gold),
+    new Card("Gold", 11, cardTypeEnum.GOOD, gold),
+    new Card("Gold", 13, cardTypeEnum.GOOD, gold),
+    new Card("Green", 1, cardTypeEnum.EVIL, green),
+    new Card("Green", 2, cardTypeEnum.EVIL, green),
+    new Card("Green", 4, cardTypeEnum.EVIL, green),
+    new Card("Green", 6, cardTypeEnum.EVIL, green),
+    new Card("Green", 8, cardTypeEnum.EVIL, green),
+    new Card("Green", 10, cardTypeEnum.EVIL, green),
+    new Card("Red", 2, cardTypeEnum.EVIL, red),
+    new Card("Red", 3, cardTypeEnum.EVIL, red),
+    new Card("Red", 5, cardTypeEnum.EVIL, red),
+    new Card("Red", 8, cardTypeEnum.EVIL, red),
+    new Card("Red", 10, cardTypeEnum.EVIL, red),
+    new Card("Red", 12, cardTypeEnum.EVIL, red),
+    new Card("Silver", 2, cardTypeEnum.GOOD, silver),
+    new Card("Silver", 3, cardTypeEnum.GOOD, silver),
+    new Card("Silver", 6, cardTypeEnum.GOOD, silver),
+    new Card("Silver", 8, cardTypeEnum.GOOD, silver),
+    new Card("Silver", 10, cardTypeEnum.GOOD, silver),
+    new Card("Silver", 12, cardTypeEnum.GOOD, silver),
+    new Card("White", 1, cardTypeEnum.EVIL, white),
+    new Card("White", 2, cardTypeEnum.EVIL, white),
+    new Card("White", 3, cardTypeEnum.EVIL, white),
+    new Card("White", 4, cardTypeEnum.EVIL, white),
+    new Card("White", 6, cardTypeEnum.EVIL, white),
+    new Card("White", 8, cardTypeEnum.EVIL, white)
+];
 
 function resetGame() {
-    deck = [
-        new Card("Archmage", 9, "mortal", function(player) {
-            alert(player);
-        }),
-        new Card("Bahamut", 13, "good", function(player) {
-            alert(player);
-        }),
-        new Card("Dracolich", 10, "evil", function(player) {
-            alert(player);
-        }),
-        new Card("Dragonslayer", 8, "mortal", function(player) {
-            alert(player);
-        }),
-        new Card("Druid", 6, "mortal", function(player) {
-            alert(player);
-        }),
-        new Card("Fool", 3, "mortal", function(player) {
-            alert(player);
-        }),
-        new Card("Priest", 5, "mortal", function(player) {
-            alert(player);
-        }),
-        new Card("Princess", 4, "mortal", function(player) {
-            alert(player);
-        }),
-        new Card("Thief", 7, "mortal", function(player) {
-            alert(player);
-        }),
-        new Card("Tiamat", 13, "evil", function(player) {
-            alert(player);
-        }),
-        new Card("Black", 1, "evil", black),
-        new Card("Black", 2, "evil", black),
-        new Card("Black", 3, "evil", black),
-        new Card("Black", 5, "evil", black),
-        new Card("Black", 7, "evil", black),
-        new Card("Black", 9, "evil", black),
-        new Card("Blue", 1, "evil", blue),
-        new Card("Blue", 2, "evil", blue),
-        new Card("Blue", 4, "evil", blue),
-        new Card("Blue", 7, "evil", blue),
-        new Card("Blue", 9, "evil", blue),
-        new Card("Blue", 11, "evil", blue),
-        new Card("Brass", 1, "good", brass),
-        new Card("Brass", 2, "good", brass),
-        new Card("Brass", 4, "good", brass),
-        new Card("Brass", 5, "good", brass),
-        new Card("Brass", 7, "good", brass),
-        new Card("Brass", 9, "good", brass),
-        new Card("Bronze", 1, "good", bronze),
-        new Card("Bronze", 3, "good", bronze),
-        new Card("Bronze", 6, "good", bronze),
-        new Card("Bronze", 7, "good", bronze),
-        new Card("Bronze", 9, "good", bronze),
-        new Card("Bronze", 11, "good", bronze),
-        new Card("Copper", 1, "good", copper),
-        new Card("Copper", 3, "good", copper),
-        new Card("Copper", 5, "good", copper),
-        new Card("Copper", 7, "good", copper),
-        new Card("Copper", 8, "good", copper),
-        new Card("Copper", 10, "good", copper),
-        new Card("Gold", 2, "good", gold),
-        new Card("Gold", 4, "good", gold),
-        new Card("Gold", 6, "good", gold),
-        new Card("Gold", 9, "good", gold),
-        new Card("Gold", 11, "good", gold),
-        new Card("Gold", 13, "good", gold),
-        new Card("Green", 1, "evil", green),
-        new Card("Green", 2, "evil", green),
-        new Card("Green", 4, "evil", green),
-        new Card("Green", 6, "evil", green),
-        new Card("Green", 8, "evil", green),
-        new Card("Green", 10, "evil", green),
-        new Card("Red", 2, "evil", red),
-        new Card("Red", 3, "evil", red),
-        new Card("Red", 5, "evil", red),
-        new Card("Red", 8, "evil", red),
-        new Card("Red", 10, "evil", red),
-        new Card("Red", 12, "evil", red),
-        new Card("Silver", 2, "good", silver),
-        new Card("Silver", 3, "good", silver),
-        new Card("Silver", 6, "good", silver),
-        new Card("Silver", 8, "good", silver),
-        new Card("Silver", 10, "good", silver),
-        new Card("Silver", 12, "good", silver),
-        new Card("White", 1, "evil", white),
-        new Card("White", 2, "evil", white),
-        new Card("White", 3, "evil", white),
-        new Card("White", 4, "evil", white),
-        new Card("White", 6, "evil", white),
-        new Card("White", 8, "evil", white)
-    ];
-    enemyHand = [];
-    yourHand = [];
-    enemyFlight = [];
-    yourFlight = [];
-    ante = [];
-    discardPile = [];
+    deck = cardGroupHashTable(true);
+    ante = cardGroupHashTable(false);
+    discardPile = cardGroupHashTable(false);
 }
 
 function startGame() {
@@ -287,7 +259,79 @@ function startGame() {
 
 }
 
-
+function cardGroupHashTable(isDeck) {
+    this.cards = {};
+    this.length = 0; //number of cards in the card group
+    this.toArray = [];
+    this.addCard = function(card) {
+        this.cards[card.getId()] = card;
+        this.toArray.unshift(card);
+    };
+    this.addCardsFrom = function(cardGroup, shuffle) {
+        if (shuffle) {
+            cardGroup.shuffle();
+        }
+        var card;
+        for (var i=0; i < cardGroup.length; i++) {
+            card = cardGroup.removeLastCard();
+            this.toArray.unshift(card);
+            this.cards[card.getId()] = card;
+            this.length++;
+        }
+    };
+    this.addCardFrom = function(cardGroup, key) {
+        var card = cardGroup.removeCard(key);
+        this.toArray.unshift(card);
+        card.index = this.length;
+        this.length++;
+    };
+    this.getCard = function(key) {
+        return this.cards[key];
+    };
+    this.removeCard = function(key) {
+        var card = this.cards[key];
+        this.cards[key] = null;
+        this.toArray.splice(card.index, 1);
+        this.length--;
+        return card;
+    };
+    this.removeLastCard = function() {
+        var card = this.toArray.pop();
+        this.cards[card.getId()] = null;
+        this.length--;
+        return card;
+    };
+    this.contains = function(key) {
+        return this.cards[key]!=null;
+    };
+    this.containsType = function(type) {
+        for (var i = 0; i < this.length; i++) {
+            if (this.toArray[i].type == type) {
+                return true;
+            }
+        }
+    };
+    this.shuffle = function() {
+        for (var i=0; i<this.length; i++) {
+            var randomIndex = Math.floor(Math.random()*this.length),
+                tempCard = this.toArray[randomIndex];
+            this.toArray[randomIndex] = this.toArray[i];
+            this.toArray[i] = tempCard;
+            this.toArray[randomIndex].index = randomIndex;
+            this.toArray[i].index = i;
+        }
+    };
+    for (var i = 0; i < 70; i++) {
+        if (isDeck) {
+            this.cards[cards[i].getId()] = cards[i];
+            this.length++;
+            this.toArray.unshift(cards[i]);
+            cards[i].index = i;
+        } else {
+            this.cards[cards[i].getId()] = null;
+        }
+    }
+}
 
 
 
