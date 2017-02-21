@@ -7,11 +7,13 @@ var locoEnum = {
     "DISCARD" : 3,
     "DECK" : 4
 };
+
 var cardTypeEnum = {
     "EVIL" : 0,
     "GOOD" : 1,
     "MORTAL": 2
 };
+
 
 /**
  * Two players per game. This is the class for the player:
@@ -19,12 +21,14 @@ var cardTypeEnum = {
  * @param playerId
  * @constructor
  */
-function Player(playerName, playerId) {
+function Player(playerName, playerId, playerNumber, playerSocket) {
+    this.socket = playerSocket;
 	this.name = playerName;
 	this.id = playerId;
-	this.hand = cardGroupHashTable(false);
+    this.number = playerNumber;
+	this.hand = new CardGroupHashTable(false);
 	//this.handSize = 0;
-    this.flight = cardGroupHashTable(false);
+    this.flight = new CardGroupHashTable(false);
     //this.flightSize = 0;
 	this.setName = function(name) {
 		this.name = name;
@@ -32,34 +36,25 @@ function Player(playerName, playerId) {
 	this.drawCards = function(num) {
 		for (var i = 0; i < num; i++){
 			if (deck.length == 0) {
-				discardToDeck();
+				deck.addCardsFrom(discardPile, true);
 			}
-			if (this.handSize < 10) {
-				this.hand[this.hand.length] = deck[0];
-				deck.splice(0, 1);
-				this.handSize++;
+			if (this.hand.length < 10) {
+			    var card = this.hand.addFirstCardFrom(deck);
+                card.player = this.number;
 			}
 		}
 	};
-	this.removeCardFromHand = function(index) {
-	    var card = this.hand[index];
-		this.hand.splice(index, 1);
-        return card;
+	this.removeCardFromHand = function(card) {
+	    this.hand.removeCard(card.getId());
 	};
-    this.removeCardFromFlight = function(index) {
-        var card = this.flight[index];
-        this.flight.splice(index, 1);
-        return card;
+    this.removeCardFromFlight = function(card) {
+        this.flight.removeCard(card.getId());
     };
 	this.addCardToHand = function(card) {
-		if (this.handSize < 10) {
-			this.hand[this.hand.length] = card;
-			//this.handSize++;
-		}
+		this.hand.addCard(card);
 	};
 	this.addCardToFlight = function(card) {
-	    this.flight[this.flight.length] = card;
-        //this.flightSize++;
+	    this.flight.addCard(card);
     };
 	this.cardSelectEnum = {
 		NONE : 0,
@@ -82,6 +77,7 @@ function Card(cardName, cardStrength, cardType, method) {
 	this.strength = cardStrength;
 	this.type = cardType;
     this.index = -1;
+    this.player = -1;
     this.location = locoEnum.DECK;  //which array card is in
 
 	/*
@@ -244,46 +240,78 @@ var cards = [
 ];
 
 function resetGame() {
-    deck = cardGroupHashTable(true);
-    ante = cardGroupHashTable(false);
-    discardPile = cardGroupHashTable(false);
+    deck = new CardGroupHashTable(true);
+    ante = new CardGroupHashTable(false);
+    discardPile = new CardGroupHashTable(false);
 }
 
 function startGame() {
     resetGame();
-    shuffle(deck);
+    deck.shuffle();
     players[0].drawCards(7);
     players[1].drawCards(7);
 
-    //call each clients' start() function
 
+    function drawCardLoop (player, i) {
+        setTimeout(function () {
+            console.log(player);
+            var otherPlayer = (player == 1) ? 0 : 1;
+            sendToPlayerSocket(players[player], 'moveCard', {
+                cardId : players[player].hand.toArray[i].getId(),
+                from : locoEnum.DECK,
+                to : locoEnum.HAND,
+                index : i
+            });
+            sendToPlayerSocket(players[otherPlayer], 'moveBack', {
+                from : locoEnum.DECK,
+                to : locoEnum.HAND,
+                index : i
+            });
+            i++;
+            if (i < 7) {
+                drawCardLoop(player, i);
+            }
+        }, 500)
+    }
+    drawCardLoop(0, 0);
+    setTimeout(function() {
+        drawCardLoop(1, 0);
+    }, 250);
 }
 
-function cardGroupHashTable(isDeck) {
+function CardGroupHashTable(isDeck) {
     this.cards = {};
     this.length = 0; //number of cards in the card group
     this.toArray = [];
     this.addCard = function(card) {
         this.cards[card.getId()] = card;
-        this.toArray.unshift(card);
+        this.toArray.push(card);
     };
     this.addCardsFrom = function(cardGroup, shuffle) {
         if (shuffle) {
             cardGroup.shuffle();
         }
-        var card;
         for (var i=0; i < cardGroup.length; i++) {
-            card = cardGroup.removeLastCard();
-            this.toArray.unshift(card);
-            this.cards[card.getId()] = card;
-            this.length++;
+            this.addFirstCardFrom(cardGroup);
         }
     };
     this.addCardFrom = function(cardGroup, key) {
         var card = cardGroup.removeCard(key);
-        this.toArray.unshift(card);
+        card.player = -1;
+        this.toArray.push(card);
+        this.cards[card.getId()] = card;
         card.index = this.length;
         this.length++;
+        return card;
+    };
+    this.addFirstCardFrom = function(cardGroup) {
+        var card = cardGroup.removeFirstCard();
+        card.player = -1;
+        this.toArray.push(card);
+        this.cards[card.getId()] = card;
+        card.index = this.length;
+        this.length++;
+        return card;
     };
     this.getCard = function(key) {
         return this.cards[key];
@@ -295,8 +323,8 @@ function cardGroupHashTable(isDeck) {
         this.length--;
         return card;
     };
-    this.removeLastCard = function() {
-        var card = this.toArray.pop();
+    this.removeFirstCard = function() {
+        var card = this.toArray.shift();
         this.cards[card.getId()] = null;
         this.length--;
         return card;
@@ -325,7 +353,7 @@ function cardGroupHashTable(isDeck) {
         if (isDeck) {
             this.cards[cards[i].getId()] = cards[i];
             this.length++;
-            this.toArray.unshift(cards[i]);
+            this.toArray.push(cards[i]);
             cards[i].index = i;
         } else {
             this.cards[cards[i].getId()] = null;
@@ -333,13 +361,12 @@ function cardGroupHashTable(isDeck) {
     }
 }
 
-
-
-
-
-
-
-
+function sendToPlayerSocket(player, stream, s) {
+    player.socket.emit(stream, s);
+}
+function sendToClient(stream, s) {
+    client.emit(stream, s);
+}
 
 
 
@@ -353,8 +380,7 @@ var players = new Array(2);
 
 
 var mongo = require('mongodb').MongoClient,
-	client = require('socket.io').listen(8080).sockets,
-	playerIds = new Array(2);
+	client = require('socket.io').listen(8080).sockets;
 
 
 mongo.connect('mongodb://127.0.0.1/chat', function(err, db){
@@ -365,11 +391,7 @@ mongo.connect('mongodb://127.0.0.1/chat', function(err, db){
 		var col = db.collection('messages'),
 		sendToSocket = function(stream, s) {
 			socket.emit(stream, s);
-		},
-		sendToClient = function(stream, s) {
-			client.emit(stream, s);
-		}
-
+		};
 
 		//wait for input
 		socket.on('input', function(data) {
@@ -380,33 +402,30 @@ mongo.connect('mongodb://127.0.0.1/chat', function(err, db){
 
 
 			if (players[0] == undefined){   //if someone logs in and there's no players[0], make them that
-				players[0] = new Player(name, playerId);
+				players[0] = new Player(name, playerId, 0, socket);
 				sendToSocket('command', 'welcome');
 				sendToSocket('status', {
 					message: "Name created",
 					clear: true
 				});
+
 			} else if (players[1] == undefined && players[0].id != playerId) {  //otherwise, there already is a players[0], so make players[1]
-				players[1] = new Player(name, playerId);
+				players[1] = new Player(name, playerId, 1, socket);
 				sendToSocket('command', 'welcome');
 				sendToSocket('status', {
 					message: "Name created",
 					clear: true
 				});
-				sendToClient('onLogin', {   //when player 2 is created, send player IDs to both players/clients
-					player1Id: players[0].id,
-					player2Id: players[1].id,
-                    player1Name: players[0].name,
-                    player2Name: players[1].name
-				});
+                sendToPlayerSocket(players[0], 'onLogin', {playerId: players[1].id, playerName: players[1].name});
+                sendToPlayerSocket(players[1], 'onLogin', {playerId: players[0].id, playerName: players[0].name});
 				//Emit all messages
 				if (players[0] != undefined){
 					col.find({"playerId" : players[0].id}).limit(100).toArray(function(err, res){
 						if (err) throw err;
 						socket.emit('output', res);
-						//}
 					});
 				}
+				startGame();
 			} else if (players[0].id != playerId && players[1].id != playerId) {
                 sendToSocket('command', 'already2');
 				sendToSocket('status', {

@@ -79,15 +79,15 @@ div canvas {
 }
 
 input[type="text"], textarea {
-	text-shadow: -.5px 0 #8d6e1e, 0 .5px #8d6e1e, .5px 0 #8d6e1e, 0 -.5px #8d6e1e;
+	text-shadow: -.5px 0 #464f61, 0 .5px #464f61, .5px 0 #464f61, 0 -.5px #464f61;
 	font-family: 'Signika', sans-serif;
 	font-size: 13px;
 	font-weight: 600;
 	outline: none;
-	color: #e0bf6b;
+	color: #8b919a;
 	border-radius: 6px;
-	background-color: #dd4124;
-	border-color: #b0321c;
+	background-color: #272c30;
+	border-color: #023;
 }
 
 input[type="text"], textarea {
@@ -103,7 +103,7 @@ input[type="text"]:active, textarea:active {
 }
 
 input[type="text"]:hover, textarea:hover {
-	background-color: #db2e22;
+	background-color: #2e2f34;
 }
 
 textarea {

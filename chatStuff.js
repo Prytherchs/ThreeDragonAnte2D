@@ -57,6 +57,7 @@
 	setEnemyInfo = function(id, name) {
 		enemyId = id;
         enemyName = name;
+        start();
 	};
 
 	try {
@@ -83,9 +84,8 @@
 					} else if (data[i].playerId == enemyId ) {
 						printUserMessage(msg, "#8d6e1e", "#000");
 					}
-					///messages.appendChild(message);
+					//messages.appendChild(message);
 					//messages.insertBefore(message, messages.firstChild);
-
 				}
 			}
 		});
@@ -93,7 +93,6 @@
 		//listen for a status
 		socket.on('status', function(data){
 			setStatus((typeof data === 'object') ? data.message : data);
-
 			if(data.clear === true) {
 				textarea.value = '';
 			}
@@ -104,15 +103,17 @@
 		});
 
 		socket.on('onLogin', function(data) {   //when both players are logged in
-			if (playerId == data.player1Id) {
-				setEnemyInfo(data.player2Id, data.player2Name);
-                printMessage(data.player2Name + " joined.");
-			}
-			else {
-				setEnemyInfo(data.player1Id, data.player1Name);
-                printMessage(data.player1Name + " joined.");
-			}
+            setEnemyInfo(data.playerId, data.playerName);
+            printMessage(data.playerName + " joined.");
 		});
+
+        socket.on('moveBack', function(data) {
+            moveInvisibleCard(data.from, data.to, data.index);
+        });
+
+        socket.on('moveCard', function(data) {
+            moveVisibleCard(data.cardId, data.from, data.to, data.index);
+        });
 
 
 		chatName.addEventListener('keydown', function(event) {
