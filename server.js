@@ -252,31 +252,36 @@ function startGame() {
     players[1].drawCards(7);
 
 
+    //this loop will happen 7 times times 2 (7 cards are drawn for each player)
     function drawCardLoop (player, i) {
         setTimeout(function () {
-            console.log(player);
             var otherPlayer = (player == 1) ? 0 : 1;
-            sendToPlayerSocket(players[player], 'moveCard', {
+            sendToPlayerSocket(players[player], 'moveCard', {   //send the player their card
                 cardId : players[player].hand.toArray[i].getId(),
                 from : locoEnum.DECK,
                 to : locoEnum.HAND,
-                index : i
+                index : i,
+                total : players[player].hand.length
             });
-            sendToPlayerSocket(players[otherPlayer], 'moveBack', {
+            sendToPlayerSocket(players[otherPlayer], 'moveBack', {  //show the card's back for the other player
                 from : locoEnum.DECK,
                 to : locoEnum.HAND,
-                index : i
+                index : i,
+                total : players[otherPlayer].hand.length
             });
             i++;
             if (i < 7) {
                 drawCardLoop(player, i);
             }
-        }, 500)
+        }, 500-20*i);
     }
     drawCardLoop(0, 0);
     setTimeout(function() {
         drawCardLoop(1, 0);
     }, 250);
+    setTimeout(function() {
+        sendToClient('command', 'redraw');
+    }, 4200); //animations should have finished by then
 }
 
 function CardGroupHashTable(isDeck) {

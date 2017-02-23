@@ -51,13 +51,11 @@
             } else {
                 printMessage("There are already two players");
             }
-		}
-	},
-
-	setEnemyInfo = function(id, name) {
-		enemyId = id;
-        enemyName = name;
-        start();
+		} else if (s == 'redraw') {
+		    console.log("test");
+		    resize();
+            animating = false;
+        }
 	};
 
 	try {
@@ -79,9 +77,9 @@
 					var msg = data[i].name + ': ' + data[i].message;
 
 					//Append
-					if (data[i].playerId == playerId){
+					if (data[i].playerId == p1.id){
 						printUserMessage(msg, "#b0321c", "#000");
-					} else if (data[i].playerId == enemyId ) {
+					} else if (data[i].playerId == p2.id) {
 						printUserMessage(msg, "#8d6e1e", "#000");
 					}
 					//messages.appendChild(message);
@@ -103,16 +101,19 @@
 		});
 
 		socket.on('onLogin', function(data) {   //when both players are logged in
-            setEnemyInfo(data.playerId, data.playerName);
+            p2 = new Player(data.playerName, data.playerId);
             printMessage(data.playerName + " joined.");
+            start();
 		});
 
         socket.on('moveBack', function(data) {
-            moveInvisibleCard(data.from, data.to, data.index);
+            p2.handSize = parseInt(data.total, 10);
+            moveInvisibleCard(data.from, data.to, data.index, false);
         });
 
         socket.on('moveCard', function(data) {
-            moveVisibleCard(data.cardId, data.from, data.to, data.index);
+            p1.handSize = parseInt(data.total, 10);
+            moveVisibleCard(data.cardId, data.from, data.to, data.index, false);
         });
 
 
@@ -122,12 +123,11 @@
 				$('textarea').height(46);
 				$('textarea').css('visibility', 'visible');
 
-				nameOfPlayer = chatName.value;
-				playerId = nameOfPlayer + Math.floor(1000*Math.random());
+                p1 = new Player(chatName.value, chatName.value + Math.floor(1000*Math.random()));
 
 				socket.emit('input', {
-					"playerId" : playerId,
-					"name" : nameOfPlayer, 
+					"playerId" : p1.id,
+					"name" : p1.name,
 					"message" : ""
 				});
 				$("#textArea").select();
@@ -148,8 +148,8 @@
 				*/
 
 				socket.emit('input', {
-					"playerId" : playerId,
-					"name" : nameOfPlayer, 
+					"playerId" : p1.id,
+					"name" : p1.name,
 					"message" : this.value
 				});
 
